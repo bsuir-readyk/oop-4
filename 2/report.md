@@ -4,7 +4,7 @@
 
 Реализована иерархия транспортных средств: абстрактный `Vehicle`, промежуточные `LandVehicle` и `WaterVehicle`, конкретные классы `Car`, `Truck`, `Boat`, `Submarine`. Дополнительно: `Engine` (композиция внутри `Vehicle`), `Driver` (агрегация по указателю), `Fleet` — коллекция `std::vector<std::unique_ptr<Vehicle>>` с `operator[]`, полиморфными `GetAllInfo()` и `MoveAll()`.
 
-Паттерн **Factory Method**: абстрактный класс `VehicleFactory` объявляет `Create(const std::string& name)` и `GetFactoryName()`; для каждого вида ТС есть конкретная фабрика (`CarFactory`, `TruckFactory`, `BoatFactory`, `SubmarineFactory`). Тип выбирается перечислением `VehicleType`; функция `GetFactory(VehicleType)` возвращает `std::unique_ptr<VehicleFactory>`. В `Create()` задаются фиксированные параметры конструктора (скорость, мощность, топливо, грузоподъёмность и т.д.) — пользователь при добавлении вводит только имя и тип из списка.
+Паттерн **Factory Method** представлен двумя обязательными элементами. **Фабричный класс** — `VehicleFactory`, который задаёт общий интерфейс фабрик; конкретные фабричные классы — `CarFactory`, `TruckFactory`, `BoatFactory`, `SubmarineFactory`. **Фабричный метод** — `Create(const std::string& name)`, переопределённый в каждой конкретной фабрике. Тип выбирается перечислением `VehicleType`; функция `GetFactory(VehicleType)` возвращает `std::unique_ptr<VehicleFactory>`. В `Create()` задаются фиксированные параметры конструктора (скорость, мощность, топливо, грузоподъёмность и т.д.) — пользователь при добавлении вводит только имя и тип из списка.
 
 Интерфейс на **Qt 6** (`MainWindow`): вкладки «Флот» (карточки, детали по клику, добавление через фабрику, удаление), «Фабрика» (демонстрация создания четырёх типов через фабрики), «Полиморфизм» (`Move()`, `GetInfo()`, `GetMaxSpeed()` по коллекции), «Исключения» (ловля `SpeedLimitException`, `FleetIndexException`, `EngineException`, базового `VehicleException`, `std::exception`), «О классах» (текстовое описание иерархии и принципов ООП). Точка входа — `main.cpp`: `QApplication`, показ `MainWindow`.
 
@@ -12,7 +12,7 @@
 
 1) Пользователь на вкладке «Флот» выбирает тип ТС и имя; `OnAddVehicle` сопоставляет строку из `QInputDialog` с `VehicleType`, вызывает `GetFactory(vtype)` и `factory->Create(name)`; объект передаётся в `Fleet::Add(std::unique_ptr<Vehicle>)`.
 
-2) Вкладка «Фабрика» по кнопке перебирает все `VehicleType`, для каждого создаёт фабрику через `GetFactory`, выводит `GetFactoryName()`, `GetInfo()` и `Move()` созданного объекта (объекты локальные, только для демонстрации).
+2) Вкладка «Фабрика» по кнопке перебирает все `VehicleType`, для каждого создаёт фабрику через `GetFactory`, явно выводит фабричный класс (`GetFactoryName()`), фабричный метод (`Create(name)`), `GetInfo()` и `Move()` созданного объекта (объекты локальные, только для демонстрации).
 
 3) Вкладка «Полиморфизм» вызывает `fleet_.MoveAll()` и `fleet_.GetAllInfo()` — внутри `Fleet` итерация по `unique_ptr<Vehicle>` и виртуальные методы базового интерфейса.
 
@@ -23,9 +23,12 @@
 ```cpp
 enum class VehicleType { kCar, kTruck, kBoat, kSubmarine };
 
+// Фабричный класс: общий интерфейс конкретных фабрик.
 class VehicleFactory {
 public:
     virtual ~VehicleFactory() = default;
+
+    // Фабричный метод: создаёт конкретный объект Vehicle.
     virtual std::unique_ptr<Vehicle> Create(const std::string& name) const = 0;
     virtual std::string GetFactoryName() const = 0;
 };

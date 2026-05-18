@@ -73,7 +73,7 @@ void MainWindow::SetupFactoryTab() {
     auto* tab = new QWidget();
     auto* layout = new QVBoxLayout(tab);
 
-    auto* btn = new QPushButton("Демонстрация паттерна Factory Method");
+    auto* btn = new QPushButton("Показать фабричный класс и фабричный метод");
     factory_output_ = new QTextEdit();
     factory_output_->setReadOnly(true);
     factory_output_->setFont(QFont("Menlo", 11));
@@ -303,7 +303,6 @@ void MainWindow::OnAddVehicle() {
     if (!ok || name.isEmpty()) return;
 
     try {
-        // Используем фабрику вместо прямого создания
         VehicleType vtype;
         if (type.startsWith("Легковой"))       vtype = VehicleType::kCar;
         else if (type.startsWith("Грузовик"))  vtype = VehicleType::kTruck;
@@ -403,20 +402,23 @@ void MainWindow::OnRunFactory() {
     QString output;
 
     output += "=== Паттерн Factory Method ===\n\n";
-    output += "Суть: базовый класс VehicleFactory определяет интерфейс Create(),\n";
-    output += "а конкретные фабрики (CarFactory, TruckFactory, ...) реализуют его.\n";
-    output += "Клиентский код работает с абстрактной фабрикой, не зная конкретных классов.\n\n";
+    output += "Фабричный класс: VehicleFactory задаёт общий интерфейс фабрик,\n";
+    output += "а CarFactory, TruckFactory, BoatFactory и SubmarineFactory — конкретные фабричные классы.\n";
+    output += "Фабричный метод: Create(const std::string& name), переопределённый в каждой фабрике.\n";
+    output += "Клиентский код получает фабрику через GetFactory(VehicleType) и вызывает Create().\n\n";
 
     // Демонстрация: создаём объекты через разные фабрики
     VehicleType types[] = {VehicleType::kCar, VehicleType::kTruck,
-                           VehicleType::kBoat, VehicleType::kSubmarine};
+                           VehicleType::kBoat, VehicleType::kSubmarine };
     std::string names[] = {"Tesla Model S", "MAN TGX", "Bayliner VR5", "Курск"};
 
     output += "=== Создание объектов через фабрики ===\n\n";
 
     for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
         auto factory = GetFactory(types[i]);
-        output += QString("Фабрика: %1\n").arg(QString::fromStdString(factory->GetFactoryName()));
+        const auto factory_name = QString::fromStdString(factory->GetFactoryName());
+        output += QString("Фабричный класс: %1\n").arg(factory_name);
+        output += QString("Фабричный метод: %1::Create(name)\n").arg(factory_name);
 
         auto vehicle = factory->Create(names[i]);
         output += QString("  Создано: %1\n").arg(QString::fromStdString(vehicle->GetInfo()));

@@ -10,6 +10,7 @@ enum class VehicleType { kCar, kTruck, kBoat, kSubmarine };
 class VehicleFactory {
 public:
     virtual ~VehicleFactory() = default;
+
     virtual std::unique_ptr<Vehicle> Create(const std::string& name) const = 0;
     virtual std::string GetFactoryName() const = 0;
 };

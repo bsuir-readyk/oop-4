@@ -28,5 +28,6 @@ std::unique_ptr<VehicleFactory> GetFactory(VehicleType type) {
         case VehicleType::kBoat:      return std::make_unique<BoatFactory>();
         case VehicleType::kSubmarine: return std::make_unique<SubmarineFactory>();
     }
+
     throw VehicleException("Неизвестный тип транспорта");
 }
